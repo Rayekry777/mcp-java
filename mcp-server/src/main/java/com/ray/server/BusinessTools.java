@@ -1,4 +1,4 @@
-package com.ray.mcp;
+package com.ray.server;
 
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;

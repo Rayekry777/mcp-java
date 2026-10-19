@@ -1,4 +1,4 @@
-package com.ray.mcp;
+package com.ray.server;
 
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;

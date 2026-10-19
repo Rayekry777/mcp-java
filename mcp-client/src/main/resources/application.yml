@@ -1,0 +1,38 @@
+mcp:
+  local:
+    enabled: ${MCP_LOCAL_ENABLED:true}
+  third-party:
+    # Windows 自动使用 npx.cmd；macOS/Linux 使用 npx。IDEA 的 PATH 不同可改为绝对路径。
+    npx-command: ${MCP_NPX_COMMAND:}
+    initialization-timeout: 120s
+    request-timeout: 60s
+    filesystem:
+      enabled: ${MCP_FILESYSTEM_ENABLED:true}
+      # 只授权这些目录；默认是启动客户端时的工作目录，可增加多个列表项。
+      allowed-directories:
+        - ${MCP_FILESYSTEM_ALLOWED_DIRECTORY:${user.dir}}
+    github:
+      enabled: ${MCP_GITHUB_ENABLED:false}
+      # 此 npm 包已弃用，保留示例兼容；可替换为官方二进制命令，args 改为 [stdio]。
+      command: ${MCP_GITHUB_COMMAND:}
+      args:
+        - -y
+        - '@modelcontextprotocol/server-github'
+spring:
+  ai:
+    openai:
+      # 使用 DashScope 的 OpenAI 兼容接口
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      api-key: ${DASHSCOPE_API_KEY}
+      chat:
+        options:
+          model: deepseek-v4.1-flash
+          temperature: 0.1      # RAG 场景用低温，减少幻觉
+          max-tokens: 2048
+    # Agent 只需要对话模型，不创建未使用的图像、音频和向量模型。
+    model:
+      embedding: none
+      image: none
+      audio:
+        speech: none
+        transcription: none

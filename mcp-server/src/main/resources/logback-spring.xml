@@ -8,11 +8,11 @@
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-    <!-- 文件输出，方便排查问题 -->
+    <!-- 由 Server 启动入口设置绝对目录，避免日志落到客户端的工作目录。 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>mcp-server.log</file>
+        <file>${mcp.server.log-dir}/mcp-server.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>mcp-server.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${mcp.server.log-dir}/mcp-server.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>7</maxHistory>
         </rollingPolicy>
         <encoder>
