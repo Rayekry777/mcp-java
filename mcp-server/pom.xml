@@ -13,20 +13,16 @@
     <description>MCP Server 服务模块：业务代码与启动入口</description>
 
     <dependencies>
-        <!-- MCP Server 核心：包含协议实现 + Spring 自动装配 -->
+        <!-- MCP SSE Server，HTTP 端点由 WebMVC 自动配置提供 -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-starter-mcp-server</artifactId>
+            <artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
         </dependency>
-        <!--
-            Spring Boot Web：MCP 自动配置内部依赖 spring-web 类（StandardServletEnvironment），
-            不引入会报 ClassNotFoundException。
-            通过 application.yml 里的 web-application-type: none，Tomcat 不会真正启动。
-        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+
         <!-- Lombok：@Slf4j、@Component 等注解简化代码 -->
         <dependency>
             <groupId>org.projectlombok</groupId>

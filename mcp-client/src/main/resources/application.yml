@@ -1,6 +1,12 @@
 mcp:
+  remote:
+    # 先独立启动 8090 端口的 SSE Server，再启动客户端。
+    enabled: ${MCP_REMOTE_ENABLED:true}
+    base-url: ${MCP_REMOTE_BASE_URL:http://localhost:8090}
+    sse-endpoint: ${MCP_REMOTE_SSE_ENDPOINT:/sse}
   local:
-    enabled: ${MCP_LOCAL_ENABLED:true}
+    # 业务 Server 已改用 SSE，不再通过 stdio 重复拉起同一个 jar。
+    enabled: ${MCP_LOCAL_ENABLED:false}
     # 相对路径基于客户端工作目录；IDEA 工作目录为项目根目录时可直接使用默认值。
     server-jar: ${MCP_LOCAL_SERVER_JAR:mcp-server/target/mcp-server-1.0.0.jar}
   third-party:

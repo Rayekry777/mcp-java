@@ -20,15 +20,20 @@ public class McpClientManager {
     public McpClientManager(
             @Qualifier("filesystemMcpClient") ObjectProvider<McpSyncClient> filesystem,
             @Qualifier("githubMcpClient") ObjectProvider<McpSyncClient> github,
+            @Qualifier("remoteToolsClient") ObjectProvider<McpSyncClient> remote,
             ObjectProvider<LocalMcpClientService> local) {
         this.clients = new LinkedHashMap<>();
         McpSyncClient filesystemClient = filesystem.getIfAvailable();
         McpSyncClient githubClient = github.getIfAvailable();
+        McpSyncClient remoteClient = remote.getIfAvailable();
         if (filesystemClient != null) {
             clients.put("filesystem", filesystemClient);
         }
         if (githubClient != null) {
             clients.put("github", githubClient);
+        }
+        if (remoteClient != null) {
+            clients.put("remote", remoteClient);
         }
         this.localClient = local.getIfAvailable();
     }

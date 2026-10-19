@@ -1,12 +1,12 @@
-# MCP stdio 示例
+# MCP SSE 与第三方 stdio 示例
 
-项目包含 `mcp-server`（本地 Java Server）与 `mcp-client`（HTTP 客户端）。客户端同时支持本地 jar、filesystem Server 和 GitHub Server。
+业务 `mcp-server` 使用 SSE，独立监听 8090；`mcp-client` 监听 8080，连接业务 SSE Server、filesystem 和 GitHub。第三方 Server 继续使用 stdio。
 
 ## 环境与启动
 
 - Java 21、Maven。
 - Node.js 与 npm/npx；建议使用当前 Node.js LTS（本机已用 Node.js 24 验证）。
-- 默认启用本地 Java Server 和 filesystem，GitHub 默认关闭。
+- 默认启用远程 SSE 连接和 filesystem，GitHub 及本地 jar 子进程连接默认关闭。
 
 先在项目根目录构建：
 
@@ -14,17 +14,47 @@
 mvn clean package
 ```
 
-本地 Java Server 默认使用 `mcp-server/target/mcp-server-1.0.0.jar`，相对路径基于客户端工作目录（项目根目录）。工作目录不同时，可在 IDEA 环境变量中设置 `MCP_LOCAL_SERVER_JAR` 为 jar 的绝对路径。只测试第三方 Server 时，在 IDEA 的 `McpClientApplication` Run Configuration → Environment variables 中设置：
+先启动 `McpServerApplication`，或在一个终端执行：
+
+```powershell
+java -jar mcp-server/target/mcp-server-1.0.0.jar
+```
+
+出现 `Tomcat started on port 8090` 后，再启动 `McpClientApplication`，或在另一个终端执行：
+
+```powershell
+java -jar mcp-client/target/mcp-tools-client-1.0.0.jar
+```
+
+Server 不再由 Client 拉起。`MCP_REMOTE_ENABLED` 默认是 `true`；IDEA 中若曾设置成 `false`，请删除旧变量或改为 `true`。地址可通过 `MCP_REMOTE_BASE_URL` 修改，SSE 路径可通过 `MCP_REMOTE_SSE_ENDPOINT` 修改。
+
+验证 SSE 端点（框架自动提供，无需 Controller）：
+
+```powershell
+curl.exe -N http://localhost:8090/sse
+```
+
+收到 `event:endpoint` 与 `/mcp/messages?sessionId=...` 后持续等待是正常现象，按 Ctrl+C 退出。验证工具列表和业务调用：
+
+```powershell
+Invoke-RestMethod 'http://localhost:8080/api/remote-mcp/tools'
+Invoke-RestMethod -Method Post -Uri 'http://localhost:8080/api/remote-mcp/call?toolName=getDateInfo' -ContentType application/json -Body '{}'
+```
+
+Agent 的 `/api/mcp/tools` 同时汇总远程工具，名称带 `remote__` 前缀。
+
+只测试第三方 Server 时，在 IDEA 的 `McpClientApplication` Run Configuration → Environment variables 中设置：
 
 ```text
 MCP_LOCAL_ENABLED=false
+MCP_REMOTE_ENABLED=false
 MCP_FILESYSTEM_ALLOWED_DIRECTORY=D:/JavaPro/mcp/mcp-stdio
 ```
 
 然后启动 `McpClientApplication`，或者在项目根目录执行：
 
 ```powershell
-java -jar mcp-client/target/mcp-tools-client-1.0.0.jar --mcp.local.enabled=false
+java -jar mcp-client/target/mcp-tools-client-1.0.0.jar --mcp.remote.enabled=false --mcp.local.enabled=false
 ```
 
 客户端默认监听 8080 端口。filesystem 默认授权启动客户端时的工作目录（`${user.dir}`）；上面的环境变量可改为其他已存在目录。多个授权目录请修改 `mcp-client/src/main/resources/application.yml` 的 `allowed-directories` 列表。授权范围内的工具支持读写操作。

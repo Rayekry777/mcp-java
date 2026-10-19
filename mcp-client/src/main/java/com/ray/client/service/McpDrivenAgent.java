@@ -32,7 +32,7 @@ public class McpDrivenAgent {
                 .defaultSystem("""
                         你是一个智能助手，请使用当前提供的 MCP 工具完成用户请求。
                         工具名格式：serverName__toolName，例如 filesystem__read_text_file。
-                        filesystem 是文件系统，github 是 GitHub，local 是本地业务服务。
+                        filesystem 是文件系统，github 是 GitHub，remote 是 SSE 业务服务，local 是 stdio 业务服务。
                         仅调用实际提供的工具；工具返回失败时如实说明，不要声称操作成功。
                         """)
                 .defaultToolCallbacks(mcpToolCallbacks.toArray(new ToolCallback[0]))

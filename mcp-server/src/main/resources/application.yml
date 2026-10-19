@@ -1,14 +1,20 @@
-# application.yml
+server:
+  port: 8090
+
 spring:
   main:
-    web-application-type: none    # 不启动 Web 服务器
-    banner-mode: off              # 关掉 Banner，避免污染 stdio 输出
+    web-application-type: servlet
+    banner-mode: off
   ai:
     mcp:
       server:
         name: ray-tools-server
         version: 1.0.0
-        type: SYNC                # SYNC 或 ASYNC，初学用 SYNC
+        type: SYNC
+        protocol: SSE
+        stdio: false
+        sse-endpoint: /sse
+        sse-message-endpoint: /mcp/messages
 
 logging:
-  config: classpath:logback-spring.xml  # 强制用自定义配置，日志走 stderr + 文件，绝不写 stdout
+  config: classpath:logback-spring.xml

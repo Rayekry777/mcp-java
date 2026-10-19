@@ -65,6 +65,19 @@ class McpClientManagerTest {
     }
 
     @Test
+    void includesAndRoutesRemoteSseTools() {
+        var remote = clientWithTool("getDateInfo");
+        when(remote.callTool(new McpSchema.CallToolRequest("getDateInfo", Map.of())))
+                .thenReturn(new McpSchema.CallToolResult(List.of(new McpSchema.TextContent("today")), false));
+        runner.withBean("remoteToolsClient", McpSyncClient.class, () -> remote).run(context -> {
+            var manager = context.getBean(McpClientManager.class);
+            assertThat(manager.getAllTools()).extracting(McpSchema.Tool::name)
+                    .containsExactly("remote__getDateInfo");
+            assertThat(manager.callTool("remote__getDateInfo", Map.of())).isEqualTo("today");
+        });
+    }
+
+    @Test
     void toolFailuresKeepTheServerErrorDetails() {
         var filesystem = clientWithTool("read_file");
         when(filesystem.callTool(any(McpSchema.CallToolRequest.class))).thenReturn(
