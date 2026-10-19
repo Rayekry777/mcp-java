@@ -10,10 +10,10 @@
         <version>3.5.11</version>
     </parent>
     <groupId>com.ray</groupId>
-    <artifactId>mcp-tools-server</artifactId>
+    <artifactId>mcp</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
-    <name>mcp-tools-server</name>
+    <name>mcp</name>
     <description>MCP 多模块聚合父 POM：仅统一依赖版本管理，不包含业务代码</description>
 
     <modules>

@@ -5,11 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.ray</groupId>
-        <artifactId>mcp-tools-server</artifactId>
+        <artifactId>mcp</artifactId>
         <version>1.0.0</version>
     </parent>
 
     <artifactId>mcp-server</artifactId>
+    <name>mcp-server</name>
     <description>MCP Server 服务模块：业务代码与启动入口</description>
 
     <dependencies>

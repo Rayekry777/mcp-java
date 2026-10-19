@@ -1,6 +1,11 @@
 server:
   port: 8090
 
+mcp:
+  security:
+    # 本地调试密钥；环境变量 MCP_API_KEY 可覆盖。
+    api-key: ${MCP_API_KEY:local-mcp-test-key}
+
 spring:
   main:
     web-application-type: servlet

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <springProperty scope="context" name="MCP_LOG_NAME" source="mcp.logging.file-name" defaultValue="mcp-server"/>
 
     <!-- 控制台输出到 System.err，避免污染 MCP stdio 通道。 -->
     <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
@@ -10,9 +11,9 @@
     </appender>
     <!-- 由 Server 启动入口设置绝对目录，避免日志落到客户端的工作目录。 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${mcp.server.log-dir}/mcp-server.log</file>
+        <file>${mcp.server.log-dir}/${MCP_LOG_NAME}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${mcp.server.log-dir}/mcp-server.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${mcp.server.log-dir}/${MCP_LOG_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>7</maxHistory>
         </rollingPolicy>
         <encoder>

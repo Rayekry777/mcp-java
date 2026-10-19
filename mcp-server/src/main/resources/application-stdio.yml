@@ -1,0 +1,14 @@
+# Inspector 启动子进程时使用：--spring.profiles.active=stdio
+spring:
+  main:
+    web-application-type: none
+    banner-mode: off
+  ai:
+    mcp:
+      server:
+        stdio: true
+
+mcp:
+  logging:
+    # 避免与同时运行的 SSE 进程写入同一日志文件。
+    file-name: mcp-server-stdio

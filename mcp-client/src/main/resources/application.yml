@@ -4,6 +4,7 @@ mcp:
     enabled: ${MCP_REMOTE_ENABLED:true}
     base-url: ${MCP_REMOTE_BASE_URL:http://localhost:8090}
     sse-endpoint: ${MCP_REMOTE_SSE_ENDPOINT:/sse}
+    api-key: ${MCP_API_KEY:local-mcp-test-key}
   local:
     # 业务 Server 已改用 SSE，不再通过 stdio 重复拉起同一个 jar。
     enabled: ${MCP_LOCAL_ENABLED:false}

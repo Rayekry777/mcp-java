@@ -45,11 +45,11 @@ public class LocalMcpClientService {
             try {
                 StdioClientTransport transport = new StdioClientTransport(
                         ServerParameters.builder("java")
-                                .args("-jar", jar.toString())
+                                .args("-jar", jar.toString(), "--spring.profiles.active=stdio")
                                 .build(),
                         new JacksonMcpJsonMapper(objectMapper));
                 attempt = McpClient.sync(transport)
-                        .clientInfo(new McpSchema.Implementation("jichi-agent", "1.0.0"))
+                        .clientInfo(new McpSchema.Implementation("ray-agent", "1.0.0"))
                         .build();
                 attempt.initialize();
                 client = attempt;

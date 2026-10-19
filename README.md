@@ -2,7 +2,31 @@
 
 业务 `mcp-server` 使用 SSE，独立监听 8090；`mcp-client` 监听 8080，连接业务 SSE Server、filesystem 和 GitHub。第三方 Server 继续使用 stdio。
 
-## 环境与启动
+## Inspector 同时测试 SSE 和 stdio
+
+同一个 jar 支持两种配置，分别运行两个进程。默认是 SSE；传入 `--spring.profiles.active=stdio` 切换为 stdio。业务工具、资源和提示词共用同一份代码。
+
+先打包 `mvn package`。Inspector 添加两条服务器记录：
+
+| 配置项 | SSE 记录 | stdio 记录 |
+|---|---|---|
+| 服务器 ID | `ray-sse` | `ray-stdio` |
+| 运输 | SSE | stdio |
+| URL | `http://localhost:8090/sse` | 不需要 |
+| Command | 不需要 | `D:/JDK21/bin/java.exe` |
+| 自定义请求头 | `X-API-Key: local-mcp-test-key`，与服务端配置一致 | 不需要 |
+
+SSE 需要先在 IDEA 启动 `McpServerApplication`，或执行 `java -jar mcp-server/target/mcp-server-1.0.0.jar`。stdio 由 Inspector 自动启动，**命令栏只填 java 可执行文件**，参数每行一个：
+
+```text
+-jar
+D:/JavaPro/mcp/mcp/mcp-server/target/mcp-server-1.0.0.jar
+--spring.profiles.active=stdio
+```
+
+`-jar` 是 JVM 参数，`--spring.profiles.active=stdio` 是应用参数，必须放在 jar 路径后面。stdio 不启动 Tomcat，不占用 8090，日志写入 `mcp-server/mcp-server-stdio.log`，SSE 仍写入 `mcp-server/mcp-server.log`。Inspector 连接两条记录后，都能测试 `getDateInfo` 等业务工具。
+
+## 环境与启动步骤
 
 - Java 21、Maven。
 - Node.js 与 npm/npx；建议使用当前 Node.js LTS（本机已用 Node.js 24 验证）。

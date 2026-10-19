@@ -20,12 +20,18 @@ public class RemoteMcpClientConfig {
     @Bean(destroyMethod = "close")
     public McpSyncClient remoteToolsClient(
             @Value("${mcp.remote.base-url:http://localhost:8090}") String baseUrl,
-            @Value("${mcp.remote.sse-endpoint:/sse}") String sseEndpoint) {
+            @Value("${mcp.remote.sse-endpoint:/sse}") String sseEndpoint,
+            @Value("${mcp.remote.api-key:}") String apiKey) {
         // SSE 传输层：只需要传 Server 的 URL
         HttpClientSseClientTransport transport =
                 HttpClientSseClientTransport.builder(baseUrl)
                         .sseEndpoint(sseEndpoint)
                         .connectTimeout(Duration.ofSeconds(5))
+                        .customizeRequest(request -> {
+                            if (!apiKey.isBlank()) {
+                                request.header("X-API-Key", apiKey);
+                            }
+                        })
                         .build();
 
         McpSyncClient client = McpClient.sync(transport)
