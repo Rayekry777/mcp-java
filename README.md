@@ -14,7 +14,7 @@
 mvn clean package
 ```
 
-本地 Java Server 继续使用 `LocalMcpClientService` 中已有的 jar 路径。只测试第三方 Server 时，在 IDEA 的 `McpClientApplication` Run Configuration → Environment variables 中设置：
+本地 Java Server 默认使用 `mcp-server/target/mcp-server-1.0.0.jar`，相对路径基于客户端工作目录（项目根目录）。工作目录不同时，可在 IDEA 环境变量中设置 `MCP_LOCAL_SERVER_JAR` 为 jar 的绝对路径。只测试第三方 Server 时，在 IDEA 的 `McpClientApplication` Run Configuration → Environment variables 中设置：
 
 ```text
 MCP_LOCAL_ENABLED=false

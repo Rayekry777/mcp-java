@@ -1,6 +1,8 @@
 mcp:
   local:
     enabled: ${MCP_LOCAL_ENABLED:true}
+    # 相对路径基于客户端工作目录；IDEA 工作目录为项目根目录时可直接使用默认值。
+    server-jar: ${MCP_LOCAL_SERVER_JAR:mcp-server/target/mcp-server-1.0.0.jar}
   third-party:
     # Windows 自动使用 npx.cmd；macOS/Linux 使用 npx。IDEA 的 PATH 不同可改为绝对路径。
     npx-command: ${MCP_NPX_COMMAND:}

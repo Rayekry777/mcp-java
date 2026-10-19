@@ -11,9 +11,12 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -24,29 +27,46 @@ import java.util.Map;
 public class LocalMcpClientService {
 
     private final ObjectMapper objectMapper;   // Spring 自动装配的 Jackson ObjectMapper
+    @Value("${mcp.local.server-jar:mcp-server/target/mcp-server-1.0.0.jar}")
+    private String serverJar;
     private McpSyncClient client;
+
 
     @PostConstruct
     public void connect() {
-        // StdioClientTransport：Client 直接启动 Server 子进程，通过 stdin/stdout 通信
-        // 和 Cursor 接 MCP 的原理完全一样，只是这里 Java 代码扮演了 Cursor 的角色
-        StdioClientTransport transport = new StdioClientTransport(
-                ServerParameters.builder("java")
-                        .args("-jar", "D:\\JavaPro\\mcp\\mcp-stdio\\mcp-server\\target\\mcp-server-1.0.0.jar")
-                        .build(),
-                new JacksonMcpJsonMapper(objectMapper)
-        );
-
-        client = McpClient.sync(transport)
-                .clientInfo(new McpSchema.Implementation("ray-agent", "1.0.0"))
-                .build();
-
-        // 第一步：握手，拿到 Server 的名字和版本
-        McpSchema.InitializeResult initResult = client.initialize();
-        log.info("[MCP] 已连接 Server：{} v{}",
-                initResult.serverInfo().name(), initResult.serverInfo().version());
-
-        // initialize() 内部已自动发送 initialized 通知，无需手动调用
+        Path jar = Path.of(serverJar).toAbsolutePath().normalize();
+        if (!Files.isRegularFile(jar) || !Files.isReadable(jar)) {
+            throw new IllegalStateException("本地 MCP Server jar 不存在或不可读：" + jar
+                    + "。请先打包 mcp-server，或通过 MCP_LOCAL_SERVER_JAR 设置正确路径");
+        }
+        int maxRetry = 3;
+        for (int i = 1; i <= maxRetry; i++) {
+            McpSyncClient attempt = null;
+            try {
+                StdioClientTransport transport = new StdioClientTransport(
+                        ServerParameters.builder("java")
+                                .args("-jar", jar.toString())
+                                .build(),
+                        new JacksonMcpJsonMapper(objectMapper));
+                attempt = McpClient.sync(transport)
+                        .clientInfo(new McpSchema.Implementation("jichi-agent", "1.0.0"))
+                        .build();
+                attempt.initialize();
+                client = attempt;
+                log.info("[MCP] 连接成功（第 {} 次尝试）", i);
+                return;
+            } catch (Exception e) {
+                if (attempt != null) {
+                    try {
+                        attempt.close();
+                    } catch (RuntimeException closeException) {
+                        e.addSuppressed(closeException);
+                    }
+                }
+                log.warn("[MCP] 第 {} 次连接失败：{}", i, e.getMessage());
+                if (i == maxRetry) throw new RuntimeException("MCP Server 连接失败，已重试 " + maxRetry + " 次", e);
+            }
+        }
     }
 
     /**
@@ -64,13 +84,15 @@ public class LocalMcpClientService {
         McpSchema.CallToolResult result = client.callTool(
                 new McpSchema.CallToolRequest(toolName, arguments));
 
-        // isError=true 表示工具执行出错，文字内容是错误信息
         if (Boolean.TRUE.equals(result.isError())) {
-            log.warn("[MCP] 工具 {} 执行失败", toolName);
-            return "工具调用失败";
+            String errorMsg = result.content().stream()
+                    .filter(c -> c instanceof McpSchema.TextContent)
+                    .map(c -> ((McpSchema.TextContent) c).text())
+                    .findFirst().orElse("未知错误");
+            log.error("[MCP] 工具 {} 执行失败：{}", toolName, errorMsg);
+            return "工具执行出错，请检查参数是否正确";
         }
 
-        // 提取文字内容（content 是数组，可能包含文字、图片等多种类型）
         return result.content().stream()
                 .filter(c -> c instanceof McpSchema.TextContent)
                 .map(c -> ((McpSchema.TextContent) c).text())
